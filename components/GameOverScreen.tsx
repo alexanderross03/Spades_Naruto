@@ -1,3 +1,5 @@
+'use client'
+
 interface Props {
   winner: 'team1' | 'team2'
   scores: { team1: number; team2: number }

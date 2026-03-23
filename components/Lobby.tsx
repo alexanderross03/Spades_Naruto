@@ -47,7 +47,7 @@ export default function Lobby({ gameId, players, myPlayerId, isHost, onRandomize
           return (
             <div
               key={seat}
-              onClick={() => player && handleSeatClick(seat)}
+              onClick={() => (player || selectedSeat !== null) && handleSeatClick(seat)}
               className={`flex items-center gap-3 bg-white/5 rounded-lg px-4 py-3 transition-all
                 ${isHost && player ? 'cursor-pointer hover:bg-white/10' : ''}
                 ${isSelected ? 'ring-2 ring-orange-400' : ''}

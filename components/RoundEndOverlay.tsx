@@ -1,3 +1,5 @@
+'use client'
+
 interface Props {
   bids: Record<string, number>
   tricksWon: Record<string, number>
@@ -21,7 +23,7 @@ export default function RoundEndOverlay({ bids, tricksWon, players, scores, bags
               <h3 className="text-orange-400 font-bold mb-2">Team {team}</h3>
               {teamPlayers.map(p => (
                 <div key={p.id} className="text-sm text-slate-300">
-                  {p.name}: bid {bids[p.id]} · won {tricksWon[p.id] ?? 0}
+                  {p.name}: bid {bids[p.id] ?? '?'} · won {tricksWon[p.id] ?? 0}
                 </div>
               ))}
               <div className="text-white font-bold mt-2 text-lg">
