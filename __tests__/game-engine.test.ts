@@ -1,6 +1,5 @@
-import { deal, validatePlay, resolveTrick, scoreRound } from '@/lib/game-engine'
-import { CARDS } from '@/lib/cards'
-import { Card, GameState } from '@/lib/types'
+import { deal, validatePlay, resolveTrick, scoreRound, checkSpadesBroken } from '@/lib/game-engine'
+import { Card } from '@/lib/types'
 
 // --- deal ---
 test('deal produces 4 hands of 13 cards', () => {
@@ -143,4 +142,20 @@ test('scoreRound: 10 bags triggers -100 penalty and resets bags', () => {
   expect(result.scores.team1).toBe(244)
   expect(result.bags.team2).toBe(0)
   expect(result.scores.team2).toBe(250)  // 200 + 50 (5×10, made exactly)
+})
+
+// --- checkSpadesBroken ---
+test('checkSpadesBroken: returns false when no spades played', () => {
+  const tricks = [
+    { plays: [{ card: { suit: 'hearts' as const, rank: 'A' as const, character: 'Gaara' } }] },
+  ]
+  expect(checkSpadesBroken(tricks)).toBe(false)
+})
+
+test('checkSpadesBroken: returns true when a spade has been played', () => {
+  const tricks = [
+    { plays: [{ card: { suit: 'hearts' as const, rank: 'A' as const, character: 'Gaara' } }] },
+    { plays: [{ card: { suit: 'spades' as const, rank: '2' as const, character: 'Kiba' } }] },
+  ]
+  expect(checkSpadesBroken(tricks)).toBe(true)
 })

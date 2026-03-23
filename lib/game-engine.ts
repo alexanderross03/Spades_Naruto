@@ -4,7 +4,11 @@ import { CARDS, cardValue } from './cards'
 // Returns { p1: Card[], p2: Card[], p3: Card[], p4: Card[] }
 // playerIds must be exactly 4 in seat order
 export function deal(playerIds: string[] = ['p1', 'p2', 'p3', 'p4']): Record<string, Card[]> {
-  const shuffled = [...CARDS].sort(() => Math.random() - 0.5)
+  const shuffled = [...CARDS]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
   const hands: Record<string, Card[]> = {}
   playerIds.forEach((id, i) => {
     hands[id] = shuffled.slice(i * 13, (i + 1) * 13)
