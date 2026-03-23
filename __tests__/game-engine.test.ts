@@ -117,7 +117,7 @@ test('scoreRound: team set (missed bid) loses 10x bid', () => {
     { team1: 200, team2: 150 }
   )
   expect(result.scores.team1).toBe(130)  // 200 - 70 (bid=7, won=5, set)
-  expect(result.scores.team2).toBe(240)  // 150 + 90 (bid=6, won=10, made + 4 bags)
+  expect(result.scores.team2).toBe(214)  // 150 + 64 (bid=6 × 10=60, + 4 bags × 1=4)
 })
 
 test('scoreRound: 10 bags triggers -100 penalty and resets bags', () => {

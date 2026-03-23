@@ -87,19 +87,8 @@ export function scoreRound(
       const teamTricks = nonNilWon + nilBreakerTricks
       if (teamTricks >= nonNilBid) {
         const newBags = teamTricks - nonNilBid
+        delta += nonNilBid * 10 + newBags  // bid × 10 + 1 per bag
         bags += newBags
-
-        let bagsScore: number
-        if (bags >= 10) {
-          // Penalty territory: bags score 1 point each (standard); penalty applied below
-          bagsScore = newBags
-        } else {
-          // Safe territory: bags score on a descending scale (9, 8, 7, … per overtrick)
-          // sum_{k=1}^{newBags}(10-k) = 10*newBags - newBags*(newBags+1)/2
-          bagsScore = 10 * newBags - (newBags * (newBags + 1)) / 2
-        }
-
-        delta += nonNilBid * 10 + bagsScore
       } else {
         delta -= nonNilBid * 10  // set
       }
