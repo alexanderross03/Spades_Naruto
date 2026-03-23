@@ -63,7 +63,7 @@ export function resolveTrick(
 export function scoreRound(
   bids: Record<string, number>,
   tricksWon: Record<string, number>,
-  players: Pick<Player, 'id' | 'seat'>[],
+  players: Player[],
   currentBags: { team1: number; team2: number },
   currentScores: { team1: number; team2: number }
 ): { scores: { team1: number; team2: number }; bags: { team1: number; team2: number } } {
