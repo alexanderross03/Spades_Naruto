@@ -3,16 +3,20 @@ import { getGame, setGame, setHands } from '@/lib/kv'
 import { pusher, gameChannel, privateChannel } from '@/lib/pusher-server'
 import { deal } from '@/lib/game-engine'
 
-export async function POST(req: Request, { params }: { params: { gameId: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ gameId: string }> }) {
+  const { gameId } = await params
   const { requesterId } = await req.json()
-  const state = await getGame(params.gameId)
+  const state = await getGame(gameId)
   if (!state) return NextResponse.json({ error: 'Game not found' }, { status: 404 })
   if (state.hostId !== requesterId) return NextResponse.json({ error: 'Only host can start' }, { status: 403 })
   if (state.players.length < 4) return NextResponse.json({ error: 'Need 4 players' }, { status: 400 })
+  if (state.status !== 'lobby' && state.status !== 'round_end') {
+    return NextResponse.json({ error: 'Cannot start game now' }, { status: 400 })
+  }
 
   const playerIds = state.players.map(p => p.id)
   const hands = deal(playerIds)
-  await setHands(params.gameId, hands)
+  await setHands(gameId, hands)
 
   const bids: Record<string, number> = {}
   const tricksWon: Record<string, number> = {}
@@ -30,14 +34,14 @@ export async function POST(req: Request, { params }: { params: { gameId: string 
   // First bidder is dealer+1
   const firstBidder = state.players[(state.dealer + 1) % 4]
   state.trickLeader = firstBidder.id
-  await setGame(params.gameId, state)
+  await setGame(gameId, state)
 
   // Send each player their hand privately
   await Promise.all(playerIds.map(id =>
     pusher.trigger(privateChannel(id), 'game-started', { hand: hands[id] })
   ))
 
-  await pusher.trigger(gameChannel(params.gameId), 'bidding-started', {
+  await pusher.trigger(gameChannel(gameId), 'bidding-started', {
     currentBidder: firstBidder.id,
     players: state.players,
   })

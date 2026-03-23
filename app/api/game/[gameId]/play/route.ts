@@ -4,11 +4,12 @@ import { pusher, gameChannel } from '@/lib/pusher-server'
 import { validatePlay, resolveTrick, scoreRound, checkSpadesBroken } from '@/lib/game-engine'
 import { Card, Suit } from '@/lib/types'
 
-export async function POST(req: Request, { params }: { params: { gameId: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ gameId: string }> }) {
+  const { gameId } = await params
   const { playerId, card }: { playerId: string; card: Card } = await req.json()
   const [state, hands] = await Promise.all([
-    getGame(params.gameId),
-    getHands(params.gameId),
+    getGame(gameId),
+    getHands(gameId),
   ])
   if (!state || !hands) return NextResponse.json({ error: 'Game not found' }, { status: 404 })
   if (state.status !== 'playing') return NextResponse.json({ error: 'Not playing phase' }, { status: 400 })
@@ -31,7 +32,7 @@ export async function POST(req: Request, { params }: { params: { gameId: string 
   hands[playerId] = hand.filter(c => !(c.suit === card.suit && c.rank === card.rank))
   state.currentTrick.push({ playerId, card })
 
-  await pusher.trigger(gameChannel(params.gameId), 'card-played', { playerId, card })
+  await pusher.trigger(gameChannel(gameId), 'card-played', { playerId, card })
 
   if (state.currentTrick.length === 4) {
     // Resolve trick
@@ -41,7 +42,7 @@ export async function POST(req: Request, { params }: { params: { gameId: string 
     state.trickLeader = winner
     state.currentTrick = []
 
-    await pusher.trigger(gameChannel(params.gameId), 'trick-complete', {
+    await pusher.trigger(gameChannel(gameId), 'trick-complete', {
       winner,
       tricksWon: state.tricksWon,
     })
@@ -60,8 +61,8 @@ export async function POST(req: Request, { params }: { params: { gameId: string 
       state.status = isGameOver ? 'game_end' : 'round_end'
       state.dealer = (state.dealer + 1) % 4
 
-      await setGame(params.gameId, state)
-      await setHands(params.gameId, hands)
+      await setGame(gameId, state)
+      await setHands(gameId, hands)
 
       if (isGameOver) {
         // Determine winner by which team hit the winning threshold (or avoided the losing one)
@@ -71,9 +72,9 @@ export async function POST(req: Request, { params }: { params: { gameId: string 
           t1wins && !t2wins ? 'team1' :
           t2wins && !t1wins ? 'team2' :
           scores.team1 >= scores.team2 ? 'team1' : 'team2'  // tie-break by score
-        await pusher.trigger(gameChannel(params.gameId), 'game-over', { winner, scores })
+        await pusher.trigger(gameChannel(gameId), 'game-over', { winner, scores })
       } else {
-        await pusher.trigger(gameChannel(params.gameId), 'round-complete', {
+        await pusher.trigger(gameChannel(gameId), 'round-complete', {
           scores, bags, bids: state.bids, tricksWon: state.tricksWon,
         })
       }
@@ -81,7 +82,7 @@ export async function POST(req: Request, { params }: { params: { gameId: string 
     }
   }
 
-  await setGame(params.gameId, state)
-  await setHands(params.gameId, hands)
+  await setGame(gameId, state)
+  await setHands(gameId, hands)
   return NextResponse.json({ ok: true })
 }

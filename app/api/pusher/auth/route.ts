@@ -17,6 +17,11 @@ export async function POST(req: Request) {
   }
 
   if (channel.startsWith('private-')) {
+    // Verify the player is authorizing their OWN private channel
+    const expectedChannel = `private-player-${playerId}`
+    if (channel !== expectedChannel) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    }
     const authResponse = pusher.authorizeChannel(socketId, channel)
     return NextResponse.json(authResponse)
   }
