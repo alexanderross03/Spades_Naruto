@@ -26,7 +26,7 @@ export default function Card({ card, onClick, disabled, selected, size = 'md' }:
       viewBox={`0 0 ${width} ${height}`}
       onClick={disabled ? undefined : onClick}
       style={{ cursor: disabled ? 'default' : onClick ? 'pointer' : 'default' }}
-      className={`transition-transform ${selected ? '-translate-y-3' : ''} ${onClick && !disabled ? 'hover:-translate-y-2' : ''}`}
+      className={`transition-transform ${selected ? '-translate-y-3' : ''} ${onClick && !disabled ? (selected ? 'hover:-translate-y-5' : 'hover:-translate-y-2') : ''}`}
     >
       {/* Card background */}
       <rect width={width} height={height} rx={4} fill="#1e293b" stroke={color} strokeWidth={selected ? 2.5 : 1.5} />
