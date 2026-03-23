@@ -18,6 +18,12 @@ export default function Home() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ playerName: name.trim() }),
     })
+    if (!res.ok) {
+      const { error } = await res.json()
+      setError(error ?? 'Failed to create game')
+      setLoading(false)
+      return
+    }
     const { gameId, playerId } = await res.json()
     sessionStorage.setItem('playerId', playerId)
     sessionStorage.setItem('playerName', name.trim())

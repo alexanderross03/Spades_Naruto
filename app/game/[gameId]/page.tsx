@@ -107,11 +107,13 @@ export default function GamePage() {
       case 'hand-restored': dispatch({ type: 'HAND_RESTORED', hand: data.hand as CardType[], gameState: data.gameState as GameState }); break
       case 'bidding-started': dispatch({ type: 'BIDDING_STARTED', currentBidder: data.currentBidder as string, players: data.players as Player[] }); break
       case 'bid-submitted': dispatch({ type: 'BID_SUBMITTED', playerId: data.playerId as string, bid: data.bid as number }); break
-      case 'all-bids-in': dispatch({ type: 'BIDDING_STARTED', currentBidder: '' }); break
+      case 'all-bids-in': dispatch({ type: 'BIDDING_STARTED', currentBidder: '' }); break  // hides BidDialog (empty string is falsy)
       case 'card-played': dispatch({ type: 'CARD_PLAYED', playerId: data.playerId as string, card: data.card as CardType }); break
       case 'trick-complete': dispatch({ type: 'TRICK_COMPLETE', winner: data.winner as string, tricksWon: data.tricksWon as Record<string, number> }); break
       case 'round-complete': dispatch({ type: 'ROUND_COMPLETE', scores: data.scores as {team1:number,team2:number}, bags: data.bags as {team1:number,team2:number}, bids: data.bids as Record<string,number>, tricksWon: data.tricksWon as Record<string,number> }); break
       case 'game-over': dispatch({ type: 'GAME_OVER', winner: data.winner as 'team1'|'team2', scores: data.scores as {team1:number,team2:number} }); break
+      case 'player-disconnected': dispatch({ type: 'PLAYER_DISCONNECTED', playerId: data.playerId as string }); break
+      case 'host-changed': dispatch({ type: 'HOST_CHANGED', hostId: data.hostId as string }); break
     }
   }, [lastEvent])
 
@@ -167,12 +169,18 @@ export default function GamePage() {
     router.push('/')
   }
 
-  const { gameState, myHand, currentBidderId, disconnectedIds, gameOverWinner } = local
+  const { gameState, myHand, currentBidderId, disconnectedIds } = local
   if (!gameState) return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-slate-400">Connecting…</div>
 
   const me = gameState.players.find(p => p.id === playerId)
   const myTeam: 1 | 2 = me ? (me.seat % 2 === 0 ? 1 : 2) : 1
   const isHost = gameState.hostId === playerId
+
+  // Derive winner from scores when reconnecting to a finished game (gameOverWinner may be null)
+  const gameOverWinner: 'team1' | 'team2' | null = local.gameOverWinner ??
+    (gameState.status === 'game_end'
+      ? (gameState.scores.team1 >= gameState.scores.team2 ? 'team1' : 'team2')
+      : null)
 
   return (
     <>

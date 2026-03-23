@@ -56,7 +56,7 @@ export default function GameTable({ gameState, myPlayerId, myHand, disconnectedI
       name: player.name,
       bid: gameState.bids[player.id] ?? -1,
       tricksWon: gameState.tricksWon[player.id] ?? 0,
-      cardCount: 13 - gameState.completedTricks.length,
+      cardCount: 13 - gameState.completedTricks.length - (gameState.currentTrick.find(p => p.playerId === player.id) ? 1 : 0),
       isCurrentTurn: currentPlayerId === player.id,
       isDisconnected: disconnectedIds.has(player.id),
       position,
