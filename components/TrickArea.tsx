@@ -9,7 +9,6 @@ interface TrickPlay {
 
 interface Props {
   plays: TrickPlay[]
-  myPlayerId: string
 }
 
 // Seat positions relative to the viewer (who is always at the bottom / seat 2 from viewer's perspective)

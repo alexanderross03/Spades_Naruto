@@ -27,7 +27,7 @@ export default function BidDialog({ hand, myName, currentBidderId, myPlayerId, b
           <div key={p.id} className="text-center">
             <div className="text-slate-400 text-xs">{p.name}</div>
             <div className="text-white font-mono">
-              {bids[p.id] >= 0 ? bids[p.id] : p.id === currentBidderId ? '…' : '?'}
+              {p.id === currentBidderId ? '…' : bids[p.id] >= 0 ? bids[p.id] : '?'}
             </div>
           </div>
         ))}
