@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Card from './Card'
 import { Card as CardType } from '@/lib/types'
+import { sortHand } from '@/lib/sort-hand'
 
 interface Props {
   hand: CardType[]
@@ -16,6 +17,7 @@ interface Props {
 export default function BidDialog({ hand, myName, currentBidderId, myPlayerId, bids, players, onBid }: Props) {
   const [selected, setSelected] = useState<number | null>(null)
   const isMyTurn = currentBidderId === myPlayerId
+  const sorted = sortHand(hand)
 
   return (
     <div className="fixed inset-0 bg-black/80 flex flex-col items-center justify-center z-50 gap-6 p-4">
@@ -33,9 +35,9 @@ export default function BidDialog({ hand, myName, currentBidderId, myPlayerId, b
         ))}
       </div>
 
-      {/* Your hand (read-only) */}
+      {/* Your hand (read-only, sorted by suit) */}
       <div className="flex flex-wrap justify-center gap-1 max-w-lg">
-        {hand.map(card => <Card key={`${card.suit}-${card.rank}`} card={card} size="sm" />)}
+        {sorted.map(card => <Card key={`${card.suit}-${card.rank}`} card={card} size="sm" />)}
       </div>
 
       {/* Bid picker */}

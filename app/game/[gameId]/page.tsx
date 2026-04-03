@@ -9,12 +9,19 @@ import BidDialog from '@/components/BidDialog'
 import RoundEndOverlay from '@/components/RoundEndOverlay'
 import GameOverScreen from '@/components/GameOverScreen'
 
+interface CompletingTrick {
+  plays: { playerId: string; card: CardType }[]
+  winner: string
+  tricksWon: Record<string, number>
+}
+
 interface LocalState {
   gameState: GameState | null
   myHand: CardType[]
   currentBidderId: string | null
   disconnectedIds: Set<string>
   gameOverWinner: 'team1' | 'team2' | null
+  completingTrick: CompletingTrick | null
 }
 
 type Action =
@@ -24,6 +31,7 @@ type Action =
   | { type: 'TEAMS_UPDATED'; players: Player[] }
   | { type: 'BIDDING_STARTED'; currentBidder: string; players?: Player[] }
   | { type: 'BID_SUBMITTED'; playerId: string; bid: number }
+  | { type: 'ALL_BIDS_IN'; trickLeader: string; bids: Record<string, number> }
   | { type: 'CARD_PLAYED'; playerId: string; card: CardType }
   | { type: 'TRICK_COMPLETE'; winner: string; tricksWon: Record<string, number> }
   | { type: 'ROUND_COMPLETE'; scores: { team1: number; team2: number }; bags: { team1: number; team2: number }; bids: Record<string, number>; tricksWon: Record<string, number> }
@@ -31,6 +39,7 @@ type Action =
   | { type: 'HAND_RESTORED'; hand: CardType[]; gameState: GameState }
   | { type: 'PLAYER_DISCONNECTED'; playerId: string }
   | { type: 'HOST_CHANGED'; hostId: string }
+  | { type: 'CLEAR_COMPLETING_TRICK' }
 
 function reducer(state: LocalState, action: Action): LocalState {
   const gs = state.gameState
@@ -47,25 +56,33 @@ function reducer(state: LocalState, action: Action): LocalState {
     case 'BIDDING_STARTED':
       return { ...state, currentBidderId: action.currentBidder,
         gameState: gs ? { ...gs, status: 'bidding', players: action.players ?? gs.players } : gs }
+    case 'ALL_BIDS_IN':
+      if (!gs) return state
+      return { ...state, currentBidderId: null,
+        gameState: { ...gs, status: 'playing', trickLeader: action.trickLeader, bids: action.bids } }
     case 'BID_SUBMITTED':
       if (!gs) return state
       return { ...state, gameState: { ...gs, bids: { ...gs.bids, [action.playerId]: action.bid } } }
     case 'CARD_PLAYED': {
       if (!gs) return state
       const newTrick = [...gs.currentTrick, { playerId: action.playerId, card: action.card }]
-      // Note: own card is removed optimistically in handlePlay before this event fires.
-      // On reconnect, hand is restored from KV via hand-restored event.
       return { ...state, gameState: { ...gs, currentTrick: newTrick, status: 'playing' } }
     }
-    case 'TRICK_COMPLETE':
+    case 'TRICK_COMPLETE': {
       if (!gs) return state
-      return { ...state, gameState: {
-        ...gs,
-        currentTrick: [],
-        trickLeader: action.winner,
-        tricksWon: action.tricksWon,
-        completedTricks: [...gs.completedTricks, { plays: gs.currentTrick, winner: action.winner }],
-      }}
+      const plays = gs.currentTrick
+      return {
+        ...state,
+        completingTrick: { plays, winner: action.winner, tricksWon: action.tricksWon },
+        gameState: {
+          ...gs,
+          currentTrick: [],
+          trickLeader: action.winner,
+          tricksWon: action.tricksWon,
+          completedTricks: [...gs.completedTricks, { plays, winner: action.winner }],
+        },
+      }
+    }
     case 'ROUND_COMPLETE':
       if (!gs) return state
       return { ...state, gameState: { ...gs, status: 'round_end', scores: action.scores, bags: action.bags, bids: action.bids, tricksWon: action.tricksWon } }
@@ -77,6 +94,8 @@ function reducer(state: LocalState, action: Action): LocalState {
     case 'HOST_CHANGED':
       if (!gs) return state
       return { ...state, gameState: { ...gs, hostId: action.hostId } }
+    case 'CLEAR_COMPLETING_TRICK':
+      return { ...state, completingTrick: null }
     default: return state
   }
 }
@@ -85,11 +104,11 @@ export default function GamePage() {
   const { gameId } = useParams<{ gameId: string }>()
   const router = useRouter()
   const playerId = typeof window !== 'undefined' ? sessionStorage.getItem('playerId') ?? '' : ''
-  const [local, dispatch] = useReducer(reducer, { gameState: null, myHand: [], currentBidderId: null, disconnectedIds: new Set<string>(), gameOverWinner: null })
+  const [local, dispatch] = useReducer(reducer, { gameState: null, myHand: [], currentBidderId: null, disconnectedIds: new Set<string>(), gameOverWinner: null, completingTrick: null })
   const [randomizing, setRandomizing] = useState(false)
   const { lastEvent } = usePusher(gameId, playerId)
 
-  // Fetch initial state on mount
+  // Fetch initial state on mount — also restores hand and derives current bidder on reconnect
   useEffect(() => {
     if (!playerId) { router.push('/'); return }
     fetch(`/api/game/${gameId}/state?playerId=${playerId}`)
@@ -97,9 +116,8 @@ export default function GamePage() {
       .then(({ state, hand }) => {
         dispatch({ type: 'SET_GAME', state })
         if (hand) dispatch({ type: 'SET_HAND', hand })
-        // Derive current bidder from state (not available via Pusher on reconnect)
         if (state?.status === 'bidding') {
-          const turnOrder = [0, 1, 2, 3].map(offset =>
+          const turnOrder = [0, 1, 2, 3].map((offset: number) =>
             state.players.find((p: { seat: number }) => p.seat === (state.dealer + 1 + offset) % 4)
           )
           const currentBidder = turnOrder.find((p: { id: string } | undefined) => p && state.bids[p.id] === -1)
@@ -119,7 +137,7 @@ export default function GamePage() {
       case 'hand-restored': dispatch({ type: 'HAND_RESTORED', hand: data.hand as CardType[], gameState: data.gameState as GameState }); break
       case 'bidding-started': dispatch({ type: 'BIDDING_STARTED', currentBidder: data.currentBidder as string, players: data.players as Player[] }); break
       case 'bid-submitted': dispatch({ type: 'BID_SUBMITTED', playerId: data.playerId as string, bid: data.bid as number }); break
-      case 'all-bids-in': dispatch({ type: 'BIDDING_STARTED', currentBidder: '' }); break  // hides BidDialog (empty string is falsy)
+      case 'all-bids-in': dispatch({ type: 'ALL_BIDS_IN', trickLeader: data.trickLeader as string, bids: data.bids as Record<string, number> }); break
       case 'card-played': dispatch({ type: 'CARD_PLAYED', playerId: data.playerId as string, card: data.card as CardType }); break
       case 'trick-complete': dispatch({ type: 'TRICK_COMPLETE', winner: data.winner as string, tricksWon: data.tricksWon as Record<string, number> }); break
       case 'round-complete': dispatch({ type: 'ROUND_COMPLETE', scores: data.scores as {team1:number,team2:number}, bags: data.bags as {team1:number,team2:number}, bids: data.bids as Record<string,number>, tricksWon: data.tricksWon as Record<string,number> }); break
@@ -128,6 +146,13 @@ export default function GamePage() {
       case 'host-changed': dispatch({ type: 'HOST_CHANGED', hostId: data.hostId as string }); break
     }
   }, [lastEvent])
+
+  // Auto-clear trick animation after 2s
+  useEffect(() => {
+    if (!local.completingTrick) return
+    const t = setTimeout(() => dispatch({ type: 'CLEAR_COMPLETING_TRICK' }), 2000)
+    return () => clearTimeout(t)
+  }, [local.completingTrick])
 
   async function handleStart() {
     await fetch(`/api/game/${gameId}/start`, {
@@ -164,12 +189,15 @@ export default function GamePage() {
   }
 
   async function handlePlay(card: CardType) {
-    // Optimistically remove card from hand
-    dispatch({ type: 'SET_HAND', hand: local.myHand.filter(c => !(c.suit === card.suit && c.rank === card.rank)) })
-    await fetch(`/api/game/${gameId}/play`, {
+    const originalHand = local.myHand
+    dispatch({ type: 'SET_HAND', hand: originalHand.filter(c => !(c.suit === card.suit && c.rank === card.rank)) })
+    const res = await fetch(`/api/game/${gameId}/play`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ playerId, card }),
     })
+    if (!res.ok) {
+      dispatch({ type: 'SET_HAND', hand: originalHand })
+    }
   }
 
   async function handleNextRound() {
@@ -183,14 +211,13 @@ export default function GamePage() {
     router.push('/')
   }
 
-  const { gameState, myHand, currentBidderId, disconnectedIds } = local
+  const { gameState, myHand, currentBidderId, disconnectedIds, completingTrick } = local
   if (!gameState) return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-slate-400">Connecting…</div>
 
   const me = gameState.players.find(p => p.id === playerId)
   const myTeam: 1 | 2 = me ? (me.seat % 2 === 0 ? 1 : 2) : 1
   const isHost = gameState.hostId === playerId
 
-  // Derive winner from scores when reconnecting to a finished game (gameOverWinner may be null)
   const gameOverWinner: 'team1' | 'team2' | null = local.gameOverWinner ??
     (gameState.status === 'game_end'
       ? (gameState.scores.team1 >= gameState.scores.team2 ? 'team1' : 'team2')
@@ -217,6 +244,7 @@ export default function GamePage() {
           myPlayerId={playerId}
           myHand={myHand}
           disconnectedIds={disconnectedIds}
+          completingTrick={completingTrick}
           onPlayCard={handlePlay}
         />
       )}

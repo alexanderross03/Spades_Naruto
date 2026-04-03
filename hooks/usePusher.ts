@@ -26,7 +26,7 @@ export function usePusher(gameId: string, playerId: string) {
 
     const EVENTS = [
       'player-joined', 'teams-updated', 'game-started',
-      'bidding-started', 'bid-submitted', 'card-played',
+      'bidding-started', 'bid-submitted', 'all-bids-in', 'card-played',
       'trick-complete', 'round-complete', 'game-over',
       'hand-restored', 'player-disconnected', 'host-changed',
     ]

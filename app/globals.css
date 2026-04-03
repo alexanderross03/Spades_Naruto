@@ -24,3 +24,66 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Card slide-in animations (played from each seat direction) */
+@keyframes slideFromTop {
+  from { transform: translateY(-72px); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+@keyframes slideFromRight {
+  from { transform: translateX(72px);  opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+@keyframes slideFromBottom {
+  from { transform: translateY(72px);  opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+@keyframes slideFromLeft {
+  from { transform: translateX(-72px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+
+/* Trick-complete scatter for losing cards */
+@keyframes scatterTop {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  15%  { opacity: 1; }
+  100% { transform: translateY(-220px) rotate(-22deg); opacity: 0; }
+}
+@keyframes scatterRight {
+  0%   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  15%  { opacity: 1; }
+  100% { transform: translate(220px, -80px) rotate(28deg); opacity: 0; }
+}
+@keyframes scatterBottom {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  15%  { opacity: 1; }
+  100% { transform: translateY(220px) rotate(22deg); opacity: 0; }
+}
+@keyframes scatterLeft {
+  0%   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  15%  { opacity: 1; }
+  100% { transform: translate(-220px, -80px) rotate(-28deg); opacity: 0; }
+}
+
+/* Winner card: pulse glow → zoom out */
+@keyframes winnerCard {
+  0%   { transform: scale(1);    filter: brightness(1);                                   opacity: 1; }
+  25%  { transform: scale(1.4);  filter: brightness(1.6) drop-shadow(0 0 14px #fbbf24);   opacity: 1; }
+  55%  { transform: scale(1.25); filter: brightness(1.4) drop-shadow(0 0 10px #fbbf24);   opacity: 1; }
+  80%  { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(0.4) translateY(-60px); opacity: 0; }
+}
+
+/* Winner toast notification */
+@keyframes toastIn {
+  0%   { transform: translate(-50%, 14px); opacity: 0; }
+  18%  { transform: translate(-50%, 0);    opacity: 1; }
+  75%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Turn indicator pulse ring */
+@keyframes turnRing {
+  0%, 100% { box-shadow: 0 0 0 0   rgba(249,115,22,0.8); }
+  50%       { box-shadow: 0 0 0 7px rgba(249,115,22,0);   }
+}
