@@ -94,7 +94,18 @@ export default function GamePage() {
     if (!playerId) { router.push('/'); return }
     fetch(`/api/game/${gameId}/state?playerId=${playerId}`)
       .then(r => r.json())
-      .then(({ state }) => dispatch({ type: 'SET_GAME', state }))
+      .then(({ state, hand }) => {
+        dispatch({ type: 'SET_GAME', state })
+        if (hand) dispatch({ type: 'SET_HAND', hand })
+        // Derive current bidder from state (not available via Pusher on reconnect)
+        if (state?.status === 'bidding') {
+          const turnOrder = [0, 1, 2, 3].map(offset =>
+            state.players.find((p: { seat: number }) => p.seat === (state.dealer + 1 + offset) % 4)
+          )
+          const currentBidder = turnOrder.find((p: { id: string } | undefined) => p && state.bids[p.id] === -1)
+          if (currentBidder) dispatch({ type: 'BIDDING_STARTED', currentBidder: currentBidder.id })
+        }
+      })
   }, [gameId, playerId])
 
   // Handle Pusher events

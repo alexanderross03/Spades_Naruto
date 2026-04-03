@@ -40,16 +40,20 @@ export default function GameTable({ gameState, myPlayerId, myHand, disconnectedI
     : null
 
   // Who plays next?
+  const trickLeaderPlayer = gameState.players.find(p => p.id === gameState.trickLeader)
+  const lastPlayed = gameState.currentTrick.length > 0
+    ? gameState.players.find(p => p.id === gameState.currentTrick[gameState.currentTrick.length - 1].playerId)
+    : undefined
   const currentSeat = gameState.currentTrick.length === 0
-    ? gameState.players.find(p => p.id === gameState.trickLeader)!.seat
-    : (gameState.players.find(p => p.id === gameState.currentTrick[gameState.currentTrick.length - 1].playerId)!.seat + 1) % 4
+    ? (trickLeaderPlayer?.seat ?? 0)
+    : ((lastPlayed?.seat ?? 0) + 1) % 4
   const currentPlayerId = gameState.players.find(p => p.seat === currentSeat)?.id
   const isMyTurn = currentPlayerId === myPlayerId
 
   // Trick plays mapped to relative seats
   const trickPlays = gameState.currentTrick.map(p => ({
     ...p,
-    seat: relSeat(gameState.players.find(pl => pl.id === p.playerId)!.seat),
+    seat: relSeat(gameState.players.find(pl => pl.id === p.playerId)?.seat ?? 0),
   }))
 
   function slotProps(player: Player | undefined, position: 'top' | 'left' | 'right') {

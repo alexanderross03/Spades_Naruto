@@ -13,7 +13,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ gameId: 
   ])
   if (!state) return NextResponse.json({ error: 'Game not found' }, { status: 404 })
 
-  // Re-send this player's hand privately if game has started
+  // Re-send this player's hand privately if game has started (for Pusher listeners)
   if (playerId && hands && hands[playerId]) {
     await pusher.trigger(privateChannel(playerId), 'hand-restored', {
       hand: hands[playerId],
@@ -21,5 +21,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ gameId: 
     })
   }
 
-  return NextResponse.json({ state })
+  const hand = playerId && hands ? (hands[playerId] ?? null) : null
+  return NextResponse.json({ state, hand })
 }
