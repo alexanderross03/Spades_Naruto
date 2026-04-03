@@ -16,7 +16,8 @@ interface Props {
 }
 
 export default function GameTable({ gameState, myPlayerId, myHand, disconnectedIds, onPlayCard }: Props) {
-  const me = gameState.players.find(p => p.id === myPlayerId)!
+  const me = gameState.players.find(p => p.id === myPlayerId)
+  if (!me) return <div className="min-h-screen bg-[#0f2e1a] flex items-center justify-center text-slate-400">Reconnecting…</div>
   const myTeam: 1 | 2 = me.seat % 2 === 0 ? 1 : 2
 
   // Map seats relative to my view (I'm always at bottom)

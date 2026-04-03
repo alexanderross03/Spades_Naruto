@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useReducer } from 'react'
+import { useEffect, useReducer, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { GameState, Card as CardType, Player } from '@/lib/types'
 import { usePusher } from '@/hooks/usePusher'
@@ -86,6 +86,7 @@ export default function GamePage() {
   const router = useRouter()
   const playerId = typeof window !== 'undefined' ? sessionStorage.getItem('playerId') ?? '' : ''
   const [local, dispatch] = useReducer(reducer, { gameState: null, myHand: [], currentBidderId: null, disconnectedIds: new Set<string>(), gameOverWinner: null })
+  const [randomizing, setRandomizing] = useState(false)
   const { lastEvent } = usePusher(gameId, playerId)
 
   // Fetch initial state on mount
@@ -125,14 +126,16 @@ export default function GamePage() {
   }
 
   async function handleRandomize() {
+    if (randomizing) return
+    setRandomizing(true)
     const seats = [0, 1, 2, 3].sort(() => Math.random() - 0.5)
-    // Apply swaps pairwise
     for (let i = 0; i < seats.length - 1; i += 2) {
       await fetch(`/api/game/${gameId}/teams`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ requesterId: playerId, seatA: seats[i], seatB: seats[i + 1] }),
       })
     }
+    setRandomizing(false)
   }
 
   async function handleSwap(seatA: number, seatB: number) {
@@ -190,6 +193,7 @@ export default function GamePage() {
           players={gameState.players}
           myPlayerId={playerId}
           isHost={isHost}
+          randomizing={randomizing}
           onRandomize={handleRandomize}
           onSwap={handleSwap}
           onStart={handleStart}

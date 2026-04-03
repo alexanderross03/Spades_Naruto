@@ -7,12 +7,13 @@ interface Props {
   players: Player[]
   myPlayerId: string
   isHost: boolean
+  randomizing: boolean
   onRandomize: () => void
   onSwap: (seatA: number, seatB: number) => void
   onStart: () => void
 }
 
-export default function Lobby({ gameId, players, myPlayerId, isHost, onRandomize, onSwap, onStart }: Props) {
+export default function Lobby({ gameId, players, myPlayerId, isHost, randomizing, onRandomize, onSwap, onStart }: Props) {
   const [selectedSeat, setSelectedSeat] = useState<number | null>(null)
 
   function handleSeatClick(seat: number) {
@@ -68,8 +69,8 @@ export default function Lobby({ gameId, players, myPlayerId, isHost, onRandomize
 
       {isHost && (
         <div className="flex gap-4">
-          <button onClick={onRandomize} className="border border-slate-600 text-slate-300 px-5 py-2 rounded hover:bg-slate-800">
-            Randomize Teams
+          <button onClick={onRandomize} disabled={randomizing} className="border border-slate-600 text-slate-300 px-5 py-2 rounded hover:bg-slate-800 disabled:opacity-50">
+            {randomizing ? 'Shuffling…' : 'Randomize Teams'}
           </button>
           <button
             onClick={onStart}
