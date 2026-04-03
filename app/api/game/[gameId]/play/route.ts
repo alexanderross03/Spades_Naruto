@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getGame, setGame, getHands, setHands } from '@/lib/kv'
 import { pusher, gameChannel } from '@/lib/pusher-server'
 import { validatePlay, resolveTrick, scoreRound, checkSpadesBroken } from '@/lib/game-engine'
-import { Card, Suit } from '@/lib/types'
+import { Card } from '@/lib/types'
 
 export async function POST(req: Request, { params }: { params: Promise<{ gameId: string }> }) {
   const { gameId } = await params
@@ -21,10 +21,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ gameId:
   if (expectedPlayer.id !== playerId) return NextResponse.json({ error: 'Not your turn' }, { status: 400 })
 
   const hand = hands[playerId]
-  const ledSuit = state.currentTrick.length > 0 ? state.currentTrick[0].card.suit as Suit : null
+  const ledCard = state.currentTrick.length > 0 ? state.currentTrick[0].card : null
   const spadesBroken = checkSpadesBroken(state.completedTricks)
 
-  if (!validatePlay(card, hand, ledSuit, spadesBroken)) {
+  if (!validatePlay(card, hand, ledCard, spadesBroken)) {
     return NextResponse.json({ error: 'Invalid play' }, { status: 400 })
   }
 

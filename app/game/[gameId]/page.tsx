@@ -238,7 +238,7 @@ export default function GamePage() {
         />
       )}
 
-      {(gameState.status === 'playing' || gameState.status === 'bidding') && (
+      {(gameState.status === 'playing' || gameState.status === 'bidding' || (gameState.status === 'round_end' && !!completingTrick) || (gameState.status === 'game_end' && !!completingTrick)) && (
         <GameTable
           gameState={gameState}
           myPlayerId={playerId}
@@ -261,7 +261,7 @@ export default function GamePage() {
         />
       )}
 
-      {gameState.status === 'round_end' && (
+      {gameState.status === 'round_end' && !completingTrick && (
         <RoundEndOverlay
           bids={gameState.bids}
           tricksWon={gameState.tricksWon}
@@ -273,7 +273,7 @@ export default function GamePage() {
         />
       )}
 
-      {gameState.status === 'game_end' && gameOverWinner && (
+      {gameState.status === 'game_end' && gameOverWinner && !completingTrick && (
         <GameOverScreen
           winner={gameOverWinner}
           scores={gameState.scores}

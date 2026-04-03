@@ -1,7 +1,6 @@
 'use client'
 import { Card as CardType, GameState, Player } from '@/lib/types'
 import { checkSpadesBroken } from '@/lib/game-engine'
-import { Suit } from '@/lib/types'
 import ScoreBar from './ScoreBar'
 import PlayerSlot from './PlayerSlot'
 import TrickArea from './TrickArea'
@@ -41,9 +40,7 @@ export default function GameTable({ gameState, myPlayerId, myHand, disconnectedI
   const left = getPlayerAt(3)
 
   const spadesBroken = checkSpadesBroken(gameState.completedTricks)
-  const ledSuit = gameState.currentTrick.length > 0
-    ? gameState.currentTrick[0].card.suit as Suit
-    : null
+  const ledCard = gameState.currentTrick.length > 0 ? gameState.currentTrick[0].card : null
 
   const trickLeaderPlayer = gameState.players.find(p => p.id === gameState.trickLeader)
   const lastPlayed = gameState.currentTrick.length > 0
@@ -131,7 +128,7 @@ export default function GameTable({ gameState, myPlayerId, myHand, disconnectedI
         <PlayerHand
           hand={myHand}
           isMyTurn={isMyTurn}
-          ledSuit={ledSuit}
+          ledCard={ledCard}
           spadesBroken={spadesBroken}
           onPlay={onPlayCard}
         />

@@ -1,6 +1,11 @@
 import { Card, Player, Suit } from './types'
 import { CARDS, cardValue } from './cards'
 
+/** Jokers, 2♠, and 2♦ (Madara) are all trump */
+export function isTrump(card: Card): boolean {
+  return card.suit === 'spades' || card.suit === 'joker' || (card.suit === 'diamonds' && card.rank === '2')
+}
+
 // Returns { p1: Card[], p2: Card[], p3: Card[], p4: Card[] }
 // playerIds must be exactly 4 in seat order
 export function deal(playerIds: string[] = ['p1', 'p2', 'p3', 'p4']): Record<string, Card[]> {
@@ -18,27 +23,32 @@ export function deal(playerIds: string[] = ['p1', 'p2', 'p3', 'p4']): Record<str
 
 /**
  * Returns true if the play is legal.
- * @param card       The card the player wants to play
- * @param hand       The player's current hand
- * @param ledSuit    The suit of the first card played this trick (null if leading)
- * @param spadesBroken  Whether spades have been played this round yet
+ * @param card          The card the player wants to play
+ * @param hand          The player's current hand
+ * @param ledCard       The first card played this trick (null if leading)
+ * @param spadesBroken  Whether trump has been played this round yet
  */
 export function validatePlay(
   card: Card,
   hand: Card[],
-  ledSuit: Suit | null,
+  ledCard: Card | null,
   spadesBroken: boolean
 ): boolean {
-  // Leading a trick
-  if (ledSuit === null) {
-    if (card.suit !== 'spades') return true
-    // Can lead spades only if broken or only spades in hand
-    return spadesBroken || hand.every(c => c.suit === 'spades')
+  if (ledCard === null) {
+    // Leading: can't lead trump until broken, unless only trump left
+    if (!isTrump(card)) return true
+    return spadesBroken || hand.every(c => isTrump(c))
   }
-  // Following: must follow suit if possible
-  const hasSuit = hand.some(c => c.suit === ledSuit)
-  if (hasSuit) return card.suit === ledSuit
-  return true  // can play anything if void in led suit
+  if (isTrump(ledCard)) {
+    // Trump was led: must follow with trump if possible
+    const hasTrump = hand.some(c => isTrump(c))
+    if (hasTrump) return isTrump(card)
+    return true  // void in trump, play anything
+  }
+  // Non-trump led: must follow that suit if possible
+  const hasSuit = hand.some(c => c.suit === ledCard.suit)
+  if (hasSuit) return card.suit === ledCard.suit
+  return true
 }
 
 /**
@@ -47,10 +57,10 @@ export function validatePlay(
 export function resolveTrick(
   trick: { playerId: string; card: Card }[]
 ): string {
-  const ledSuit = trick[0].card.suit
-  // Find highest spade, or highest card of led suit
-  const spades = trick.filter(p => p.card.suit === 'spades')
-  const candidates = spades.length > 0 ? spades : trick.filter(p => p.card.suit === ledSuit)
+  const ledCard = trick[0].card
+  // Highest trump wins; if no trump played, highest of led suit wins
+  const trumps = trick.filter(p => isTrump(p.card))
+  const candidates = trumps.length > 0 ? trumps : trick.filter(p => p.card.suit === ledCard.suit)
   return candidates.reduce((best, p) =>
     cardValue(p.card) > cardValue(best.card) ? p : best
   ).playerId
@@ -118,9 +128,9 @@ export function scoreRound(
   }
 }
 
-/** Returns true if spades have been broken by the given trick history */
+/** Returns true if trump has been broken (any spade, joker, or 2♦ played) */
 export function checkSpadesBroken(completedTricks: { plays: { card: Card }[] }[]): boolean {
   return completedTricks.some(trick =>
-    trick.plays.some(p => p.card.suit === 'spades')
+    trick.plays.some(p => isTrump(p.card))
   )
 }
