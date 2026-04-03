@@ -1,0 +1,20 @@
+{"type":"server-started","port":59884,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:59884","screen_dir":"/Users/alexanderross/Desktop/Spades_Naruto/.superpowers/brainstorm/72289-1774226527"}
+{"type":"screen-added","file":"/Users/alexanderross/Desktop/Spades_Naruto/.superpowers/brainstorm/72289-1774226527/approaches.html"}
+{"type":"screen-updated","file":"/Users/alexanderross/Desktop/Spades_Naruto/.superpowers/brainstorm/72289-1774226527/approaches.html"}
+{"type":"screen-updated","file":"/Users/alexanderross/Desktop/Spades_Naruto/.superpowers/brainstorm/72289-1774226527/approaches.html"}
+{"type":"screen-updated","file":"/Users/alexanderross/Desktop/Spades_Naruto/.superpowers/brainstorm/72289-1774226527/approaches.html"}
+{"source":"user-event","type":"click","text":"A\n    \n      Next.js + Pusher + Vercel KV ★ Recommended\n      Frontend and API routes in Next.js on Vercel. Pusher handles real-time (WebSockets). Vercel KV (free Redis) holds game state server-side so reconnects work perfectly and cheating isn't possible.\n      \n        ProsServer-authoritative (secure)Reconnect-safe — refresh and pick back upVercel KV is 1-click, free, no schemaEverything in one repo, deploys to Vercel\n        ConsNeeds a Vercel KV instance (but it's one click)Slightly more moving parts","choice":"a","id":null,"timestamp":1774228021064}
+{"source":"user-event","type":"click","text":"A\n    \n      Next.js + Pusher + Vercel KV ★ Recommended\n      Frontend and API routes in Next.js on Vercel. Pusher handles real-time (WebSockets). Vercel KV (free Redis) holds game state server-side so reconnects work perfectly and cheating isn't possible.\n      \n        ProsServer-authoritative (secure)Reconnect-safe — refresh and pick back upVercel KV is 1-click, free, no schemaEverything in one repo, deploys to Vercel\n        ConsNeeds a Vercel KV instance (but it's one click)Slightly more moving parts","choice":"a","id":null,"timestamp":1774228048296}
+{"type":"screen-added","file":"/Users/alexanderross/Desktop/Spades_Naruto/.superpowers/brainstorm/72289-1774226527/table-layout.html"}
+{"type":"screen-updated","file":"/Users/alexanderross/Desktop/Spades_Naruto/.superpowers/brainstorm/72289-1774226527/table-layout.html"}
+{"type":"screen-updated","file":"/Users/alexanderross/Desktop/Spades_Naruto/.superpowers/brainstorm/72289-1774226527/table-layout.html"}
+{"type":"screen-updated","file":"/Users/alexanderross/Desktop/Spades_Naruto/.superpowers/brainstorm/72289-1774226527/table-layout.html"}
+{"type":"screen-added","file":"/Users/alexanderross/Desktop/Spades_Naruto/.superpowers/brainstorm/72289-1774226527/lobby.html"}
+{"type":"screen-updated","file":"/Users/alexanderross/Desktop/Spades_Naruto/.superpowers/brainstorm/72289-1774226527/lobby.html"}
+{"type":"screen-updated","file":"/Users/alexanderross/Desktop/Spades_Naruto/.superpowers/brainstorm/72289-1774226527/lobby.html"}
+{"type":"screen-updated","file":"/Users/alexanderross/Desktop/Spades_Naruto/.superpowers/brainstorm/72289-1774226527/lobby.html"}
+{"type":"screen-added","file":"/Users/alexanderross/Desktop/Spades_Naruto/.superpowers/brainstorm/72289-1774226527/waiting.html"}
+{"type":"screen-updated","file":"/Users/alexanderross/Desktop/Spades_Naruto/.superpowers/brainstorm/72289-1774226527/waiting.html"}
+{"type":"screen-updated","file":"/Users/alexanderross/Desktop/Spades_Naruto/.superpowers/brainstorm/72289-1774226527/waiting.html"}
+{"type":"screen-updated","file":"/Users/alexanderross/Desktop/Spades_Naruto/.superpowers/brainstorm/72289-1774226527/waiting.html"}
+{"type":"server-stopped","reason":"idle timeout"}

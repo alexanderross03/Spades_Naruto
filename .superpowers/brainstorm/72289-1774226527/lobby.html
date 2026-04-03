@@ -1,0 +1,56 @@
+<h2>Lobby / Join Flow</h2>
+<p class="subtitle">How players get into a game — no accounts, no passwords</p>
+
+<div class="split" style="gap:24px;align-items:flex-start">
+
+  <!-- Create game screen -->
+  <div class="mockup">
+    <div class="mockup-header">Step 1: Landing Page</div>
+    <div class="mockup-body" style="background:#0f1117;padding:24px;display:flex;flex-direction:column;align-items:center;gap:16px;min-height:260px">
+      <div style="font-size:1.3rem;font-weight:bold;color:#f97316;letter-spacing:1px">🍃 SPADES: NARUTO</div>
+      <div style="color:#64748b;font-size:0.8rem">A card game for shinobi</div>
+      <input class="mock-input" style="width:180px;text-align:center" placeholder="Your ninja name..." />
+      <div style="display:flex;gap:12px;margin-top:4px">
+        <button class="mock-button" style="background:#f97316;color:white;border:none;padding:8px 18px;border-radius:6px;cursor:pointer;font-weight:bold">Create Game</button>
+        <button class="mock-button" style="background:transparent;color:#f97316;border:2px solid #f97316;padding:8px 18px;border-radius:6px;cursor:pointer;font-weight:bold">Join Game</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lobby screen -->
+  <div class="mockup">
+    <div class="mockup-header">Step 2: Lobby (waiting for 4 players)</div>
+    <div class="mockup-body" style="background:#0f1117;padding:20px;min-height:260px">
+      <div style="text-align:center;margin-bottom:12px">
+        <div style="color:#94a3b8;font-size:0.75rem;margin-bottom:4px">Game Code — share this with your friends</div>
+        <div style="font-size:2rem;font-weight:bold;letter-spacing:8px;color:#f97316;background:rgba(249,115,22,0.1);border:1px solid #f97316;border-radius:8px;padding:8px 20px;display:inline-block">K4KS</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px">
+        <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border-radius:6px;padding:8px 12px">
+          <div style="width:8px;height:8px;background:#22c55e;border-radius:50%"></div>
+          <span style="color:#e2e8f0;font-size:0.9rem">Kakashi</span>
+          <span style="color:#64748b;font-size:0.75rem;margin-left:auto">Team 1 · Host</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border-radius:6px;padding:8px 12px">
+          <div style="width:8px;height:8px;background:#22c55e;border-radius:50%"></div>
+          <span style="color:#e2e8f0;font-size:0.9rem">Naruto</span>
+          <span style="color:#64748b;font-size:0.75rem;margin-left:auto">Team 2</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border-radius:6px;padding:8px 12px;opacity:0.4;border:1px dashed #334155">
+          <div style="width:8px;height:8px;background:#475569;border-radius:50%"></div>
+          <span style="color:#64748b;font-size:0.9rem">Waiting...</span>
+          <span style="color:#475569;font-size:0.75rem;margin-left:auto">Team 1</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border-radius:6px;padding:8px 12px;opacity:0.4;border:1px dashed #334155">
+          <div style="width:8px;height:8px;background:#475569;border-radius:50%"></div>
+          <span style="color:#64748b;font-size:0.9rem">Waiting...</span>
+          <span style="color:#475569;font-size:0.75rem;margin-left:auto">Team 2</span>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:16px;color:#64748b;font-size:0.78rem">Waiting for 2 more players...</div>
+    </div>
+  </div>
+
+</div>
+
+<p style="text-align:center;color:#9ca3af;font-size:0.85rem;margin-top:16px">Teams auto-assign in join order (1st+3rd = Team 1, 2nd+4th = Team 2). Seating: Team 1 sits across from each other, Team 2 sits across from each other. Does this flow look right?</p>

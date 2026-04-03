@@ -1,0 +1,42 @@
+<h2>3 Architecture Approaches</h2>
+<p class="subtitle">Pick the one that fits best — or let me know your thoughts</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Next.js + Pusher + Vercel KV <span style="color:#f97316;font-size:0.75rem;margin-left:8px;">★ Recommended</span></h3>
+      <p>Frontend and API routes in Next.js on Vercel. Pusher handles real-time (WebSockets). Vercel KV (free Redis) holds game state server-side so reconnects work perfectly and cheating isn't possible.</p>
+      <div class="pros-cons" style="margin-top:12px">
+        <div class="pros"><h4>Pros</h4><ul><li>Server-authoritative (secure)</li><li>Reconnect-safe — refresh and pick back up</li><li>Vercel KV is 1-click, free, no schema</li><li>Everything in one repo, deploys to Vercel</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Needs a Vercel KV instance (but it's one click)</li><li>Slightly more moving parts</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Next.js + Pusher (no storage)</h3>
+      <p>Same as A but game state lives only in the browsers. One player's tab acts as the "host" and broadcasts state to others. No KV needed.</p>
+      <div class="pros-cons" style="margin-top:12px">
+        <div class="pros"><h4>Pros</h4><ul><li>Truly no backend storage at all</li><li>Simpler setup</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>If the host player refreshes mid-game, state is lost</li><li>Other players can't reconnect cleanly</li><li>Easier to cheat (client holds full deck)</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Next.js + Supabase Realtime</h3>
+      <p>Uses Supabase's free tier for both real-time messaging AND storage. One service instead of two, generous free tier.</p>
+      <div class="pros-cons" style="margin-top:12px">
+        <div class="pros"><h4>Pros</h4><ul><li>One service does everything</li><li>Free tier is very generous</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Supabase account + project setup required</li><li>More overhead than needed for a small game</li><li>If you said "no database" — Supabase is a Postgres DB</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p style="margin-top:24px;font-size:0.9rem;color:#9ca3af;">Click to select, then let me know in the terminal. I recommend <strong>A</strong> — Vercel KV is just a key-value store (JSON blobs), not a real "database" in the scary sense. No schema, no tables, one click to create.</p>

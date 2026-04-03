@@ -13,42 +13,52 @@ export default function Home() {
   async function createGame() {
     if (!name.trim()) return setError('Enter your ninja name')
     setLoading(true)
-    const res = await fetch('/api/game/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ playerName: name.trim() }),
-    })
-    if (!res.ok) {
-      const { error } = await res.json()
-      setError(error ?? 'Failed to create game')
+    setError('')
+    try {
+      const res = await fetch('/api/game/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerName: name.trim() }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError(data.error ?? `Server error (${res.status})`)
+        return
+      }
+      sessionStorage.setItem('playerId', data.playerId)
+      sessionStorage.setItem('playerName', name.trim())
+      router.push(`/game/${data.gameId}`)
+    } catch {
+      setError('Network error — could not reach server')
+    } finally {
       setLoading(false)
-      return
     }
-    const { gameId, playerId } = await res.json()
-    sessionStorage.setItem('playerId', playerId)
-    sessionStorage.setItem('playerName', name.trim())
-    router.push(`/game/${gameId}`)
   }
 
   async function joinGame() {
     if (!name.trim()) return setError('Enter your ninja name')
     if (!code.trim()) return setError('Enter a game code')
     setLoading(true)
-    const res = await fetch(`/api/game/${code.trim().toUpperCase()}/join`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ playerName: name.trim() }),
-    })
-    if (!res.ok) {
-      const { error } = await res.json()
-      setError(error)
+    setError('')
+    try {
+      const res = await fetch(`/api/game/${code.trim().toUpperCase()}/join`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerName: name.trim() }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError(data.error ?? `Server error (${res.status})`)
+        return
+      }
+      sessionStorage.setItem('playerId', data.playerId)
+      sessionStorage.setItem('playerName', name.trim())
+      router.push(`/game/${code.trim().toUpperCase()}`)
+    } catch {
+      setError('Network error — could not reach server')
+    } finally {
       setLoading(false)
-      return
     }
-    const { playerId } = await res.json()
-    sessionStorage.setItem('playerId', playerId)
-    sessionStorage.setItem('playerName', name.trim())
-    router.push(`/game/${code.trim().toUpperCase()}`)
   }
 
   return (
