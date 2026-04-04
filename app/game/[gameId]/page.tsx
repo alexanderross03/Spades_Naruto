@@ -29,7 +29,7 @@ type Action =
   | { type: 'SET_HAND'; hand: CardType[] }
   | { type: 'PLAYER_JOINED'; player: Player }
   | { type: 'TEAMS_UPDATED'; players: Player[] }
-  | { type: 'BIDDING_STARTED'; currentBidder: string; players?: Player[] }
+  | { type: 'BIDDING_STARTED'; currentBidder: string; players?: Player[]; bids?: Record<string, number>; tricksWon?: Record<string, number>; completedTricks?: []; round?: number }
   | { type: 'BID_SUBMITTED'; playerId: string; bid: number }
   | { type: 'ALL_BIDS_IN'; trickLeader: string; bids: Record<string, number> }
   | { type: 'CARD_PLAYED'; playerId: string; card: CardType }
@@ -55,7 +55,15 @@ function reducer(state: LocalState, action: Action): LocalState {
       return { ...state, gameState: { ...gs, players: action.players } }
     case 'BIDDING_STARTED':
       return { ...state, currentBidderId: action.currentBidder,
-        gameState: gs ? { ...gs, status: 'bidding', players: action.players ?? gs.players } : gs }
+        gameState: gs ? {
+          ...gs,
+          status: 'bidding',
+          players: action.players ?? gs.players,
+          ...(action.bids !== undefined && { bids: action.bids }),
+          ...(action.tricksWon !== undefined && { tricksWon: action.tricksWon }),
+          ...(action.completedTricks !== undefined && { completedTricks: action.completedTricks, currentTrick: [] }),
+          ...(action.round !== undefined && { round: action.round }),
+        } : gs }
     case 'ALL_BIDS_IN':
       if (!gs) return state
       return { ...state, currentBidderId: null,
@@ -135,7 +143,7 @@ export default function GamePage() {
       case 'teams-updated': dispatch({ type: 'TEAMS_UPDATED', players: data.players as Player[] }); break
       case 'game-started': dispatch({ type: 'SET_HAND', hand: data.hand as CardType[] }); break
       case 'hand-restored': dispatch({ type: 'HAND_RESTORED', hand: data.hand as CardType[], gameState: data.gameState as GameState }); break
-      case 'bidding-started': dispatch({ type: 'BIDDING_STARTED', currentBidder: data.currentBidder as string, players: data.players as Player[] }); break
+      case 'bidding-started': dispatch({ type: 'BIDDING_STARTED', currentBidder: data.currentBidder as string, players: data.players as Player[], bids: data.bids as Record<string,number> | undefined, tricksWon: data.tricksWon as Record<string,number> | undefined, completedTricks: data.completedTricks as [] | undefined, round: data.round as number | undefined }); break
       case 'bid-submitted': dispatch({ type: 'BID_SUBMITTED', playerId: data.playerId as string, bid: data.bid as number }); break
       case 'all-bids-in': dispatch({ type: 'ALL_BIDS_IN', trickLeader: data.trickLeader as string, bids: data.bids as Record<string, number> }); break
       case 'card-played': dispatch({ type: 'CARD_PLAYED', playerId: data.playerId as string, card: data.card as CardType }); break

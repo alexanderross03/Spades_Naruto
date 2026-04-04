@@ -46,8 +46,9 @@ export function validatePlay(
     return true  // void in trump, play anything
   }
   // Non-trump led: must follow that suit if possible
-  const hasSuit = hand.some(c => c.suit === ledCard.suit)
-  if (hasSuit) return card.suit === ledCard.suit
+  // Trump cards (e.g. 2♦) don't count as their face suit for following purposes
+  const hasSuit = hand.some(c => c.suit === ledCard.suit && !isTrump(c))
+  if (hasSuit) return card.suit === ledCard.suit && !isTrump(card)
   return true
 }
 

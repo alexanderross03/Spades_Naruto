@@ -28,8 +28,9 @@ export default function GameTable({ gameState, myPlayerId, myHand, disconnectedI
   const mySeat = me.seat
   const myTeam: 1 | 2 = mySeat % 2 === 0 ? 1 : 2
 
+  // relSeat: 0=top (across), 1=right, 2=bottom (me), 3=left
   function relSeat(absoluteSeat: number): number {
-    return (absoluteSeat - mySeat + 4) % 4
+    return (absoluteSeat - mySeat + 2 + 4) % 4
   }
 
   const getPlayerAt = (rel: number) =>

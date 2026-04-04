@@ -44,6 +44,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ gameId:
   await pusher.trigger(gameChannel(gameId), 'bidding-started', {
     currentBidder: firstBidder.id,
     players: state.players,
+    bids: state.bids,
+    tricksWon: state.tricksWon,
+    completedTricks: [],
+    round: state.round,
   })
 
   return NextResponse.json({ ok: true })

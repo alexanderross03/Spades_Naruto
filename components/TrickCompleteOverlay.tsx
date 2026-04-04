@@ -17,7 +17,7 @@ interface Props {
 }
 
 function relSeat(absoluteSeat: number, mySeat: number): number {
-  return (absoluteSeat - mySeat + 4) % 4
+  return (absoluteSeat - mySeat + 2 + 4) % 4
 }
 
 const GRID_POS: Record<number, string> = {
