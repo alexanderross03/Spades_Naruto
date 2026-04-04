@@ -1,15 +1,19 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import Pusher, { Channel } from 'pusher-js'
+import Pusher from 'pusher-js'
 
-export interface PusherEvent {
-  event: string
-  data: unknown
-}
-
-export function usePusher(gameId: string, playerId: string) {
+// Accepts a callback instead of returning lastEvent so that rapid back-to-back
+// Pusher events (e.g. card-played + trick-complete) are never dropped by React
+// 18 automatic batching. The callback is called synchronously inside the Pusher
+// event handler — outside React's render cycle — so every event is delivered.
+export function usePusher(
+  gameId: string,
+  playerId: string,
+  onEvent: (event: string, data: unknown) => void,
+) {
   const pusherRef = useRef<Pusher | null>(null)
-  const [lastEvent, setLastEvent] = useState<PusherEvent | null>(null)
+  const onEventRef = useRef(onEvent)
+  onEventRef.current = onEvent
   const [isConnected, setIsConnected] = useState(false)
 
   useEffect(() => {
@@ -32,8 +36,8 @@ export function usePusher(gameId: string, playerId: string) {
     ]
 
     EVENTS.forEach(event => {
-      channel.bind(event, (data: unknown) => setLastEvent({ event, data }))
-      privateChannel.bind(event, (data: unknown) => setLastEvent({ event, data }))
+      channel.bind(event, (data: unknown) => onEventRef.current(event, data))
+      privateChannel.bind(event, (data: unknown) => onEventRef.current(event, data))
     })
 
     pusher.connection.bind('connected', () => setIsConnected(true))
@@ -46,5 +50,5 @@ export function usePusher(gameId: string, playerId: string) {
     }
   }, [gameId, playerId])
 
-  return { lastEvent, isConnected }
+  return { isConnected }
 }

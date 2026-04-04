@@ -114,7 +114,26 @@ export default function GamePage() {
   const playerId = typeof window !== 'undefined' ? sessionStorage.getItem('playerId') ?? '' : ''
   const [local, dispatch] = useReducer(reducer, { gameState: null, myHand: [], currentBidderId: null, disconnectedIds: new Set<string>(), gameOverWinner: null, completingTrick: null })
   const [randomizing, setRandomizing] = useState(false)
-  const { lastEvent } = usePusher(gameId, playerId)
+
+  // Handle Pusher events — callback-based to avoid React 18 batching dropping rapid events
+  usePusher(gameId, playerId, (event, rawData) => {
+    const data = rawData as Record<string, unknown>
+    switch (event) {
+      case 'player-joined': dispatch({ type: 'PLAYER_JOINED', player: data.player as Player }); break
+      case 'teams-updated': dispatch({ type: 'TEAMS_UPDATED', players: data.players as Player[] }); break
+      case 'game-started': dispatch({ type: 'SET_HAND', hand: data.hand as CardType[] }); break
+      case 'hand-restored': dispatch({ type: 'HAND_RESTORED', hand: data.hand as CardType[], gameState: data.gameState as GameState }); break
+      case 'bidding-started': dispatch({ type: 'BIDDING_STARTED', currentBidder: data.currentBidder as string, players: data.players as Player[], bids: data.bids as Record<string,number> | undefined, tricksWon: data.tricksWon as Record<string,number> | undefined, completedTricks: data.completedTricks as [] | undefined, round: data.round as number | undefined }); break
+      case 'bid-submitted': dispatch({ type: 'BID_SUBMITTED', playerId: data.playerId as string, bid: data.bid as number }); break
+      case 'all-bids-in': dispatch({ type: 'ALL_BIDS_IN', trickLeader: data.trickLeader as string, bids: data.bids as Record<string, number> }); break
+      case 'card-played': dispatch({ type: 'CARD_PLAYED', playerId: data.playerId as string, card: data.card as CardType }); break
+      case 'trick-complete': dispatch({ type: 'TRICK_COMPLETE', winner: data.winner as string, tricksWon: data.tricksWon as Record<string, number> }); break
+      case 'round-complete': dispatch({ type: 'ROUND_COMPLETE', scores: data.scores as {team1:number,team2:number}, bags: data.bags as {team1:number,team2:number}, bids: data.bids as Record<string,number>, tricksWon: data.tricksWon as Record<string,number> }); break
+      case 'game-over': dispatch({ type: 'GAME_OVER', winner: data.winner as 'team1'|'team2', scores: data.scores as {team1:number,team2:number} }); break
+      case 'player-disconnected': dispatch({ type: 'PLAYER_DISCONNECTED', playerId: data.playerId as string }); break
+      case 'host-changed': dispatch({ type: 'HOST_CHANGED', hostId: data.hostId as string }); break
+    }
+  })
 
   // Fetch initial state on mount — also restores hand and derives current bidder on reconnect
   useEffect(() => {
@@ -133,27 +152,6 @@ export default function GamePage() {
         }
       })
   }, [gameId, playerId])
-
-  // Handle Pusher events
-  useEffect(() => {
-    if (!lastEvent) return
-    const { event, data } = lastEvent as { event: string; data: Record<string, unknown> }
-    switch (event) {
-      case 'player-joined': dispatch({ type: 'PLAYER_JOINED', player: data.player as Player }); break
-      case 'teams-updated': dispatch({ type: 'TEAMS_UPDATED', players: data.players as Player[] }); break
-      case 'game-started': dispatch({ type: 'SET_HAND', hand: data.hand as CardType[] }); break
-      case 'hand-restored': dispatch({ type: 'HAND_RESTORED', hand: data.hand as CardType[], gameState: data.gameState as GameState }); break
-      case 'bidding-started': dispatch({ type: 'BIDDING_STARTED', currentBidder: data.currentBidder as string, players: data.players as Player[], bids: data.bids as Record<string,number> | undefined, tricksWon: data.tricksWon as Record<string,number> | undefined, completedTricks: data.completedTricks as [] | undefined, round: data.round as number | undefined }); break
-      case 'bid-submitted': dispatch({ type: 'BID_SUBMITTED', playerId: data.playerId as string, bid: data.bid as number }); break
-      case 'all-bids-in': dispatch({ type: 'ALL_BIDS_IN', trickLeader: data.trickLeader as string, bids: data.bids as Record<string, number> }); break
-      case 'card-played': dispatch({ type: 'CARD_PLAYED', playerId: data.playerId as string, card: data.card as CardType }); break
-      case 'trick-complete': dispatch({ type: 'TRICK_COMPLETE', winner: data.winner as string, tricksWon: data.tricksWon as Record<string, number> }); break
-      case 'round-complete': dispatch({ type: 'ROUND_COMPLETE', scores: data.scores as {team1:number,team2:number}, bags: data.bags as {team1:number,team2:number}, bids: data.bids as Record<string,number>, tricksWon: data.tricksWon as Record<string,number> }); break
-      case 'game-over': dispatch({ type: 'GAME_OVER', winner: data.winner as 'team1'|'team2', scores: data.scores as {team1:number,team2:number} }); break
-      case 'player-disconnected': dispatch({ type: 'PLAYER_DISCONNECTED', playerId: data.playerId as string }); break
-      case 'host-changed': dispatch({ type: 'HOST_CHANGED', hostId: data.hostId as string }); break
-    }
-  }, [lastEvent])
 
   // Auto-clear trick animation after 2s
   useEffect(() => {

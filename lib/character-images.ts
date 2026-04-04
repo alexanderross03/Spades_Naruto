@@ -107,9 +107,10 @@ export const CHARACTER_IMAGES: Record<string, string> = {
   'Might Guy':  'https://s4.anilist.co/file/anilistcdn/character/large/b307-xieUEdhdTVwQ.png',
 
   // ── Hearts / Hidden Sand ──────────────────────────────────────────
-  'Gaara':      'https://s4.anilist.co/file/anilistcdn/character/large/b1662-4E5J0LX9jZKZ.png',
-  'Temari':     'https://s4.anilist.co/file/anilistcdn/character/large/b2174-XTX0TtzkZCnO.png',
-  'Kankuro':    'https://s4.anilist.co/file/anilistcdn/character/large/n4694-2brvNKpdqARU.png',
+  'Gaara':          'https://s4.anilist.co/file/anilistcdn/character/large/b1662-4E5J0LX9jZKZ.png',
+  '4th Kazekage':   'https://s4.anilist.co/file/anilistcdn/character/large/n22920-MZPUrxk6WQ8V.png',
+  'Temari':         'https://s4.anilist.co/file/anilistcdn/character/large/b2174-XTX0TtzkZCnO.png',
+  'Kankuro':        'https://s4.anilist.co/file/anilistcdn/character/large/n4694-2brvNKpdqARU.png',
 
   // ── Diamonds / Akatsuki ───────────────────────────────────────────
   'Pain':       'https://s4.anilist.co/file/anilistcdn/character/large/b3180-ITMGBLWNBOgV.png',
